@@ -9,18 +9,21 @@ export function useLenis() {
       return
     }
 
-    // Initialize ultra-smooth Lenis instance with autoRaf
+    // Initialize ultra-smooth Lenis instance with standard high-performance lerp
+    // Lerp mode provides continuous, zero-jank 60/120fps scrolling without duration stutter
     const lenis = new Lenis({
-      duration: 1.05,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      lerp: 0.09,
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
-      wheelMultiplier: 0.95,
-      touchMultiplier: 1.5,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.0,
       infinite: false,
       autoRaf: true,
     })
+
+    // Expose lenis instance to window for global access if needed
+    ;(window as unknown as { __lenis?: Lenis }).__lenis = lenis
 
     // Handle internal anchor clicks with Lenis smooth scroll
     const handleAnchorClick = (e: MouseEvent) => {
@@ -33,7 +36,7 @@ export function useLenis() {
         e.preventDefault()
         const targetElement = document.querySelector(href)
         if (targetElement) {
-          lenis.scrollTo(targetElement as HTMLElement, { offset: -70, duration: 1.1 })
+          lenis.scrollTo(targetElement as HTMLElement, { offset: -70, duration: 1.0 })
         }
       }
     }
@@ -43,6 +46,7 @@ export function useLenis() {
     return () => {
       document.removeEventListener('click', handleAnchorClick)
       lenis.destroy()
+      delete (window as unknown as { __lenis?: Lenis }).__lenis
     }
   }, [])
 }

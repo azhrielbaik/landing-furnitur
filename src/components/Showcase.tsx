@@ -40,7 +40,7 @@ function ParallaxCard({
         <div className="relative group overflow-hidden rounded-2xl bg-[#141414] border border-white/10 aspect-[4/3] sm:aspect-[16/10]">
           {/* Parallax image — oversized with hardware-accelerated transform */}
           <motion.div
-            className="absolute inset-0 w-full will-change-transform"
+            className="absolute inset-0 w-full"
             style={{ y: imageY, height: '116%', top: '-8%' }}
           >
             <img
@@ -48,7 +48,7 @@ function ParallaxCard({
               alt={`Tampilan furnitur ${project.name}`}
               loading="lazy"
               decoding="async"
-              className="w-full h-full object-cover object-center filter brightness-[0.88] contrast-[1.05] transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+              className="w-full h-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-[1.03]"
             />
           </motion.div>
 

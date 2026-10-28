@@ -1,57 +1,24 @@
-import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
+import { useState, useEffect } from 'react'
+import { motion } from 'motion/react'
 import {
   ArrowUpRight,
   ChevronLeft,
   ChevronRight,
   ArrowDown,
-  Video,
-  Image as ImageIcon,
-  Play,
-  Pause,
 } from 'lucide-react'
 import { HERO_SLIDES } from '../data/landingData'
 
-type BgMode = 'video' | 'slideshow'
-
 export function Hero() {
-  const [bgMode, setBgMode] = useState<BgMode>('video')
-  const [isPlaying, setIsPlaying] = useState(true)
   const [activeBgSlide, setActiveBgSlide] = useState(0)
-  const videoRef = useRef<HTMLVideoElement>(null)
 
   // Slideshow auto-advance timer
   useEffect(() => {
-    if (bgMode !== 'slideshow' || !isPlaying) return
-
     const interval = setInterval(() => {
       setActiveBgSlide((prev) => (prev + 1) % HERO_SLIDES.length)
     }, 5200)
 
     return () => clearInterval(interval)
-  }, [bgMode, isPlaying])
-
-  // Auto-play video whenever bgMode is 'video' and isPlaying is true
-  useEffect(() => {
-    if (bgMode === 'video' && videoRef.current && isPlaying) {
-      videoRef.current.play().catch(() => {})
-    }
-  }, [bgMode, isPlaying])
-
-  // Handle Play/Pause
-  const togglePlay = () => {
-    setIsPlaying((prev) => {
-      const next = !prev
-      if (videoRef.current) {
-        if (next) {
-          videoRef.current.play().catch(() => {})
-        } else {
-          videoRef.current.pause()
-        }
-      }
-      return next
-    })
-  }
+  }, [])
 
   const prevSlide = () => {
     setActiveBgSlide((prev) => (prev === 0 ? HERO_SLIDES.length - 1 : prev - 1))
@@ -64,123 +31,40 @@ export function Hero() {
   return (
     <section
       id="hero"
-      className="relative pt-40 pb-20 sm:pt-48 sm:pb-28 lg:pt-52 lg:pb-32 overflow-hidden min-h-[92vh] flex flex-col justify-between"
+      className="relative isolate pt-40 pb-20 sm:pt-48 sm:pb-28 lg:pt-52 lg:pb-32 overflow-hidden min-h-[92vh] flex flex-col justify-between"
       aria-label="Pengenalan Atelier Furnitur KONTRAST"
     >
-      {/* ─── DYNAMIC HERO BACKGROUND (VIDEO / SLIDESHOW) ────────────────────── */}
-      <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden">
-        {/* Mode A: Video Atelier Background — Bright & Vivid Woodworking */}
-        {bgMode === 'video' && (
-          <div className="absolute inset-0 w-full h-full">
-            <video
-              ref={videoRef}
-              src="https://cdn.coverr.co/videos/coverr-carpenter-measuring-wood-5345/1080p.mp4"
-              poster={HERO_SLIDES[0]?.image}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover object-center filter brightness-[0.92] contrast-[1.02] saturate-[1.12] scale-105 transition-opacity duration-1000"
-            />
-          </div>
-        )}
+      {/* ─── DYNAMIC HERO BACKGROUND (IMAGE SLIDESHOW) ────────────────────── */}
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+        {/* Seamless Cross-Fade Product Slideshow */}
+        {HERO_SLIDES.map((slide, idx) => {
+          const isActive = activeBgSlide === idx
+          return (
+            <div
+              key={slide.id}
+              className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
+                isActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
+              }`}
+            >
+              <img
+                src={slide.image}
+                alt={slide.title}
+                loading={idx === 0 ? 'eager' : 'lazy'}
+                decoding="async"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover object-center"
+              />
+            </div>
+          )
+        })}
 
-        {/* Mode B: Full-Bleed Product Slideshow Background — Bright & Crisp WebP */}
-        {bgMode === 'slideshow' && (
-          <div className="absolute inset-0 w-full h-full">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeBgSlide}
-                initial={{ opacity: 0, scale: 1.05 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 1.2, ease: 'easeInOut' }}
-                className="absolute inset-0 w-full h-full"
-              >
-                <img
-                  src={HERO_SLIDES[activeBgSlide]?.image}
-                  alt={HERO_SLIDES[activeBgSlide]?.title}
-                  decoding="async"
-                  className="w-full h-full object-cover object-center filter brightness-[0.88] contrast-[1.04] saturate-[1.08]"
-                />
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        )}
-
-        {/* Lightweight atmospheric overlays — ensures the woodworking video and furniture slides remain bright, vibrant, and clear */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/50 via-black/25 to-[#0a0a0a]/85" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_rgba(10,10,10,0.45)_100%)]" />
-        <div className="absolute inset-0 bg-grain opacity-10" />
+        {/* Atmospheric overlays — preserves bright, vivid furniture details while keeping text crisp */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/75 via-[#0a0a0a]/25 to-[#0a0a0a]/85 z-30" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_45%,_rgba(10,10,10,0.45)_100%)] z-30" />
+        <div className="absolute inset-0 bg-grain opacity-5 z-30" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full flex-1 flex flex-col justify-between">
-        {/* Top Bar with Badge + Background Mode Switcher */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 sm:mb-12">
-          {/* Top Editorial Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="flex flex-wrap items-center gap-3"
-          >
-            <div className="inline-flex items-center space-x-2.5 px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-xs font-mono tracking-widest uppercase text-zinc-200 shadow-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#c8ff3d] shadow-[0_0_8px_#c8ff3d]" />
-              <span>(00) ATELIER FURNITUR &amp; ARSITEKTUR KAYU SOLID</span>
-            </div>
-
-            <span className="text-zinc-600 hidden sm:inline">•</span>
-
-            <div className="font-mono text-xs text-[#c8ff3d] font-semibold tracking-widest uppercase">
-              0% RISIKO DP — SAMPEL KAYU &amp; RENDER 3D DI AWAL
-            </div>
-          </motion.div>
-
-          {/* Interactive Background Toggle (Video / Slideshow) */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="self-start sm:self-auto inline-flex items-center p-1 rounded-full bg-black/70 backdrop-blur-lg border border-white/15 shadow-xl font-mono text-[11px]"
-          >
-            <button
-              type="button"
-              onClick={() => setBgMode('video')}
-              className={`flex items-center space-x-1.5 px-3 py-1 rounded-full transition-all duration-200 ${
-                bgMode === 'video'
-                  ? 'bg-[#c8ff3d] text-[#0a0a0a] font-bold shadow-[0_0_12px_rgba(200,255,61,0.4)]'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              <Video className="w-3.5 h-3.5" />
-              <span>Video Kriya</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setBgMode('slideshow')}
-              className={`flex items-center space-x-1.5 px-3 py-1 rounded-full transition-all duration-200 ${
-                bgMode === 'slideshow'
-                  ? 'bg-[#c8ff3d] text-[#0a0a0a] font-bold shadow-[0_0_12px_rgba(200,255,61,0.4)]'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              <ImageIcon className="w-3.5 h-3.5" />
-              <span>Slide Produk</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={togglePlay}
-              className="p-1 px-2 rounded-full text-zinc-400 hover:text-white transition-colors"
-              title={isPlaying ? 'Jeda Rotasi Otomatis' : 'Jalankan Rotasi Otomatis'}
-              aria-label={isPlaying ? 'Jeda Rotasi' : 'Jalankan Rotasi'}
-            >
-              {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-[#c8ff3d]" />}
-            </button>
-          </motion.div>
-        </div>
-
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-40 w-full flex-1 flex flex-col justify-between">
         {/* Giant Editorial Headline & Body */}
         <motion.div
           initial={{ opacity: 0, y: 25 }}
@@ -221,46 +105,44 @@ export function Hero() {
             </a>
           </div>
 
-          {/* Sleek Floating Slide Indicator (Active when in Slideshow Mode) */}
-          {bgMode === 'slideshow' && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-flex flex-wrap items-center gap-3 bg-black/75 backdrop-blur-md border border-white/15 px-4 py-2 rounded-xl text-xs font-mono shadow-lg mt-2"
-            >
-              <div className="flex items-center space-x-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#c8ff3d]" />
-                <span className="text-[#c8ff3d] font-bold">
-                  0{activeBgSlide + 1} / 0{HERO_SLIDES.length}
-                </span>
-              </div>
-              <span className="text-zinc-600 hidden sm:inline">•</span>
-              <span className="text-white font-medium">
-                {HERO_SLIDES[activeBgSlide]?.title}
+          {/* Sleek Floating Slide Indicator */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex flex-wrap items-center gap-3 bg-black/75 backdrop-blur-md border border-white/15 px-4 py-2 rounded-xl text-xs font-mono shadow-lg mt-2"
+          >
+            <div className="flex items-center space-x-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#c8ff3d]" />
+              <span className="text-[#c8ff3d] font-bold">
+                0{activeBgSlide + 1} / 0{HERO_SLIDES.length}
               </span>
-              <span className="text-zinc-400 hidden sm:inline text-[11px]">
-                ({HERO_SLIDES[activeBgSlide]?.metric})
-              </span>
-              <div className="flex items-center space-x-1 ml-auto">
-                <button
-                  type="button"
-                  onClick={prevSlide}
-                  className="p-1 rounded bg-white/10 hover:bg-[#c8ff3d] hover:text-[#0a0a0a] text-white transition-colors"
-                  aria-label="Slide Produk Sebelumnya"
-                >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={nextSlide}
-                  className="p-1 rounded bg-white/10 hover:bg-[#c8ff3d] hover:text-[#0a0a0a] text-white transition-colors"
-                  aria-label="Slide Produk Selanjutnya"
-                >
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </motion.div>
-          )}
+            </div>
+            <span className="text-zinc-600 hidden sm:inline">•</span>
+            <span className="text-white font-medium">
+              {HERO_SLIDES[activeBgSlide]?.title}
+            </span>
+            <span className="text-zinc-400 hidden sm:inline text-[11px]">
+              ({HERO_SLIDES[activeBgSlide]?.metric})
+            </span>
+            <div className="flex items-center space-x-1 ml-auto">
+              <button
+                type="button"
+                onClick={prevSlide}
+                className="p-1 rounded bg-white/10 hover:bg-[#c8ff3d] hover:text-[#0a0a0a] text-white transition-colors"
+                aria-label="Slide Produk Sebelumnya"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={nextSlide}
+                className="p-1 rounded bg-white/10 hover:bg-[#c8ff3d] hover:text-[#0a0a0a] text-white transition-colors"
+                aria-label="Slide Produk Selanjutnya"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </motion.div>
         </motion.div>
 
         {/* Bottom Editorial Atelier Highlights & Scroll Indicator */}

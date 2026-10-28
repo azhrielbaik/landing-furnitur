@@ -2,10 +2,6 @@ import { ArrowUp } from 'lucide-react'
 import { NAV_ITEMS } from '../data/landingData'
 
 export function Footer() {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
   return (
     <footer className="border-t border-white/10 bg-[#080808] pt-20 pb-12 relative overflow-hidden" aria-label="Footer Website KONTRAST">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -85,16 +81,15 @@ export function Footer() {
             <span className="hover:text-zinc-400 cursor-pointer">Kebijakan Privasi</span>
             <span className="hover:text-zinc-400 cursor-pointer">Syarat & Ketentuan</span>
 
-            {/* Back to top button */}
-            <button
-              type="button"
-              onClick={scrollToTop}
+            {/* Back to top link handled smoothly by Lenis */}
+            <a
+              href="#hero"
               className="inline-flex items-center space-x-1.5 text-zinc-300 hover:text-[#c8ff3d] transition-colors p-1.5 rounded-lg hover:bg-white/5"
               aria-label="Kembali ke atas halaman"
             >
               <span>Atas</span>
               <ArrowUp className="w-3.5 h-3.5" />
-            </button>
+            </a>
           </div>
         </div>
       </div>
